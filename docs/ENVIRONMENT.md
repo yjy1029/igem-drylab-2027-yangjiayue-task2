@@ -1,0 +1,185 @@
+# Task 2 环境准备清单（Windows / 你本机的实际情况）
+
+> 目标：把「交互式蛋白结构可视化单文件网页」这一任务需要的一切软件与运行环境备齐。
+> 本文件是**可执行的核对表**，装完一项勾一项。
+> 最后更新：见 git log。
+
+---
+
+## 0. 先看结论
+
+这个任务只需要 **4 样东西**，其中 1 样你已经有了：
+
+| # | 需要 | 状态（本机实测） |
+|---|---|---|
+| 1 | **Node.js 20 LTS+（含 npm）** | ❌ 未安装 —— **必须装** |
+| 2 | **VS Code** | ❌ 未安装 —— 建议装 |
+| 3 | **Git** | ✅ 已有 `git 2.54.0.windows.1`（`D:\Git\cmd`） |
+| 4 | **Chrome / Edge** | ✅ 系统自带 Edge 即可 |
+
+**明确不需要**（这是 Task 1 的东西，别去装，会浪费一整天）：
+conda、PyMOL、AutoDock Vina、Open Babel、MGLTools、GPU、服务器、数据库。
+
+---
+
+## 1. 必装
+
+### 1.1 Node.js LTS（含 npm）
+
+**为什么必须**：整个流程都靠它——
+
+- 拉取 3Dmol.js / pako（离线内联用）与 esbuild（打包压缩）；
+- 用 Node 写 PDB 预处理脚本（解析原子、去水、算 5 Å 接触残基、输出 JSON）；
+- 把 `src/` + 库 + 数据**内联打包**成那一个 `index.html`；
+- 本地起调试服务器。
+
+**版本要求**：**≥ 18**（脚本用了内置 `fetch`），推荐 **20 LTS 或 22 LTS**。
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+装完**关掉并重开终端**（PATH 才生效），然后：
+
+```powershell
+node -v      # 期望 v20.x 或 v22.x
+npm -v       # 期望 10.x / 11.x
+```
+
+### 1.2 VS Code
+
+```powershell
+winget install Microsoft.VisualStudioCode
+```
+
+扩展（装完在扩展面板里搜，或命令行 `code --install-extension <id>`）：
+
+| 扩展 | 作用 |
+|---|---|
+| `esbenp.prettier-vscode` | 代码格式化（保持风格统一） |
+| `EditorConfig.EditorConfig` | 对齐缩进/换行 |
+| `dbaeumer.vscode-eslint` | 可选；查语法与坏味道 |
+| `ritwickdey.LiveServer` | 可选；一键本地预览 |
+| `usernamehw.errorlens` | 可选；行内报错，写长 JS 很救命 |
+
+> ⚠️ **别装"分子可视化"类扩展**，这个任务不需要，反而会干扰。
+
+### 1.3 Git（已有，但要配一次身份）
+
+```powershell
+git --version                      # ✅ 2.54.0.windows.1
+git config --global user.name  "你的名字"
+git config --global user.email "你的邮箱"
+git config --global core.autocrlf true   # Windows 上必配，否则换行符会污染 diff
+```
+
+### 1.4 浏览器
+
+用 **Edge** 或 **Chrome** 都行，关键是用它的 DevTools：
+
+- `F12` → **Network** 面板：提交前确认**没有任何一条网络请求**（离线硬约束）；
+- `F12` → **Application / Performance**：看加载与渲染耗时；
+- 无痕窗口（`Ctrl+Shift+N`）：验证"新用户第一次打开"的体验。
+
+---
+
+## 2. 建议装（不装也能干活）
+
+| 工具 | 用途 | 形态 |
+|---|---|---|
+| **Figma**（网页版即可） | 配色板、图注排版、截图版面拼装 | 免费网页版 |
+| **Inkscape**（可选） | 若想矢量修图 | `winget install Inkscape.Inkscape` |
+| **Python 3.11**（可选） | 如果你想用 Biopython 写预处理 | `winget install Python.Python.3.12` |
+
+> Python 是**可选**的：预处理用 Node 一样做（而且不必再装一套依赖）。**建议先用 Node 一条路走完。**
+
+---
+
+## 3. 项目内依赖（npm 包）
+
+进入项目目录后执行：
+
+```powershell
+cd C:\Users\32240\Desktop\igem-drylab-2027-task2
+npm i 3dmol pako
+npm i -D esbuild
+```
+
+| 包 | 类型 | 为什么 |
+|---|---|---|
+| `3dmol` | 运行时 | 分子渲染库本体（Task 2 允许的两个库之一）。安装后从 `node_modules/3dmol/build/3Dmol-min.js` 取，**内联进 HTML**，绝不走 CDN |
+| `pako` | 运行时（可选） | 把内嵌的 PDB 数据 gzip 后 base64 存进 HTML，页面里解压。不装也能做，只是 HTML 会大 2–3 倍 |
+| `esbuild` | 开发 | 把多文件源码打包、压缩成一个 `<script>` |
+| `serve`（npx 临时用，不必装） | 开发 | 本地预览。**注意**：`file://` 下也要能跑，别依赖它 |
+
+> **不要**装 React/Vue/Tailwind 之类框架。单文件 + 完全离线的约束下，原生 HTML/CSS/JS 最省心，构建产物也最小。
+
+---
+
+## 4. 数据（不是软件，但属于"环境"）
+
+从 **RCSB PDB** 下载 3 个结构的 **PDB 格式**文件：
+
+| PDB ID | 放进 | 说明 |
+|---|---|---|
+| `1EMA` | `prep/raw/1EMA.pdb` | GFP，发色团 `CRO` 共价嵌在链内 |
+| `1M17` | `prep/raw/1M17.pdb` | EGFR + 厄洛替尼，配体 `AQ4` |
+| `1BRS` | `prep/raw/1BRS.pdb` | Barnase–barstar，链 A 与 D |
+
+两种方式任选：
+
+```powershell
+# 方式 A：跑仓库里的脚本（已写好，需 Node）
+npm run fetch
+
+# 方式 B：浏览器下载
+# https://files.rcsb.org/download/1EMA.pdb
+# https://files.rcsb.org/download/1M17.pdb
+# https://files.rcsb.org/download/1BRS.pdb
+```
+
+脚本会打印每个文件的字节数与 **SHA-256**，记进 `prep/notes.md`——这是"我处理的是哪个版本的数据"的证据（PDB 条目会被修订）。
+
+---
+
+## 5. 验收（装完跑一次）
+
+双击项目根目录的 **`check-env.cmd`**，或：
+
+```powershell
+npm run check
+```
+
+期望输出全部 `[OK]`。出现 `[MISSING]` 就回到对应小节补装。
+
+> 本机已知限制：**PowerShell 执行策略禁止直接运行 `.ps1`**。
+> 所以 `check-env.cmd` 是个包装器（内部用 `-ExecutionPolicy Bypass` 调用脚本）。
+> 你自己写 `.ps1` 调试时也要这样调用，否则会报"在此系统上禁止运行脚本"。
+
+---
+
+## 6. 常见坑（提前知道能省几小时）
+
+1. **`file://` 下不能 fetch 本地文件**。任何 `fetch('data.json')` 的写法，双击打开就废。
+   数据必须以**内联字符串**（或 base64）形式写在 HTML/JS 里。
+2. **CDN 引库 = 直接违规**。`<script src="https://...">`、Google Fonts、unpkg、jsdelivr 全部不行。
+   字体也要自托管或改用系统字体栈。
+3. **单文件 ≠ 单脚本**。最终提交物只能是**一个** `.html`；`src/`、`build/` 这些是仓库里的源文件，不算违规，但 `index.html` 必须自包含。
+4. **npm 慢**：可临时用镜像 `npm config set registry https://registry.npmmirror.com`（提交前改回官方源，避免 lockfile 混乱）。
+5. **Node 版本太低**（≤16）没有内置 `fetch`，预处理脚本会直接报错。
+6. **别把 `node_modules/` 提交进仓库**（`.gitignore` 已处理）。
+7. **Windows 换行**：`core.autocrlf=true`，否则提交的 diff 全是 `^M`。
+
+---
+
+## 7. 接下来的动手顺序（环境就绪之后）
+
+| 阶段 | 产出 | 说明 |
+|---|---|---|
+| **P1 数据管道** | `prep/clean/*.pdb`、`prep/contacts/*.json` | 去水/裁链、抽配体、按 5 Å 算接触残基并落盘 |
+| **P2 骨架跑通** | `index.html` 能切三个结构、四种表示 | 先丑后美，功能优先 |
+| **P3 补齐约束** | 单文件内联、断网可用 | 打包脚本 + Network 面板自测 |
+| **P4 视觉打磨** | 配色/字体/交互态/过渡 | 这是评分重头，**留足时间** |
+| **P5 交付** | 截图、README、AI_USAGE.md、public repo | 提前 1 天冻结 |
+
+时间线见根目录 `README.md`。

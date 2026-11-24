@@ -1,0 +1,15 @@
+{
+  "name": "igem-drylab-2027-task2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "iGEM 2027 JLU-CP Dry Lab / Task 2 - offline single-file protein structure viewer",
+  "scripts": {
+    "fetch": "node prep/scripts/fetch-pdb.mjs",
+    "check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-env.ps1",
+    "dev": "npx --yes serve -l 5173 ."
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

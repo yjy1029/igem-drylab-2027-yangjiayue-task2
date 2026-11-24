@@ -1,0 +1,16 @@
+node_modules/
+package-lock.json.bak
+
+# 从 RCSB 下载的原始结构文件（体积大、可复现下载）
+prep/raw/*.pdb
+prep/raw/*.cif
+prep/raw/*.gz
+
+# 构建中间产物
+build/tmp/
+
+# 系统垃圾
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log

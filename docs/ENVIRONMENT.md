@@ -10,11 +10,11 @@
 
 这个任务只需要 **4 样东西**，其中 1 样你已经有了：
 
-| # | 需要 | 状态（本机实测） |
+| # | 需要 | 状态（本机实测，2026-11-24） |
 |---|---|---|
-| 1 | **Node.js 20 LTS+（含 npm）** | ❌ 未安装 —— **必须装** |
-| 2 | **VS Code** | ❌ 未安装 —— 建议装 |
-| 3 | **Git** | ✅ 已有 `git 2.54.0.windows.1`（`D:\Git\cmd`） |
+| 1 | **Node.js 20 LTS+（含 npm）** | ✅ 已装 `v26.13.1` / npm `11.20.0`（`C:\Program Files\nodejs`） |
+| 2 | **VS Code** | ❌ 未装 —— 建议装（不装也能干活，用记事本会痛苦） |
+| 3 | **Git** | ✅ 已有 `git 2.54.0.windows.1`（`D:\Git\cmd`），`user.name/email` 已配 |
 | 4 | **Chrome / Edge** | ✅ 系统自带 Edge 即可 |
 
 **明确不需要**（这是 Task 1 的东西，别去装，会浪费一整天）：
@@ -33,18 +33,31 @@ conda、PyMOL、AutoDock Vina、Open Babel、MGLTools、GPU、服务器、数据
 - 把 `src/` + 库 + 数据**内联打包**成那一个 `index.html`；
 - 本地起调试服务器。
 
-**版本要求**：**≥ 18**（脚本用了内置 `fetch`），推荐 **20 LTS 或 22 LTS**。
+**版本要求**：**≥ 18**（脚本用了内置 `fetch`），推荐 **20 LTS 或 22 LTS**。本机已装 `v26.13.1`（LTS 线，满足要求）。
 
 ```powershell
-winget install OpenJS.NodeJS.LTS
+winget install OpenJS.NodeJS.LTS     # ← 本机已完成
 ```
 
 装完**关掉并重开终端**（PATH 才生效），然后：
 
 ```powershell
-node -v      # 期望 v20.x 或 v22.x
-npm -v       # 期望 10.x / 11.x
+node -v      # ✅ 本机：v26.13.1
+npm.cmd -v   # ✅ 本机：11.20.0
 ```
+
+> ⚠️ **本机特有的坑：PowerShell 里 `npm` 会报"禁止运行脚本"**。
+> 原因是 PowerShell 会把 `npm` 解析成 `C:\Program Files\nodejs\npm.ps1`，而本机执行策略禁止运行 `.ps1`。
+> **解决办法：一律写 `npm.cmd`**（`cmd` 批处理不受执行策略限制）。
+> ```powershell
+> npm        # ❌ 报错：无法加载文件 npm.ps1 … 禁止运行脚本
+> npm.cmd    # ✅ 正常
+> ```
+> 如果你想让 `npm` 直接可用，可以（可选、二选一）：
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # 放开当前用户的脚本执行
+> ```
+> 不改执行策略也完全能干活，本文档与脚本内都统一用 `npm.cmd` / `-ExecutionPolicy Bypass`。
 
 ### 1.2 VS Code
 
@@ -101,9 +114,19 @@ git config --global core.autocrlf true   # Windows 上必配，否则换行符�
 
 ```powershell
 cd C:\Users\32240\Desktop\igem-drylab-2027-task2
-npm i 3dmol pako
-npm i -D esbuild
+npm.cmd i 3dmol pako
+npm.cmd i -D esbuild
 ```
+
+**本机已执行完毕**，当前版本：
+
+| 包 | 版本 | 位置 / 说明 |
+|---|---|---|
+| `3dmol` | `^3.0.0` | 内联用的文件是 **`node_modules/3dmol/build/3Dmol-min.js`（580 KB）** |
+| `pako` | `^3.0.3` | 可选，数据 gzip 解压 |
+| `esbuild` | `^0.28.2` | 打包压缩（注意 npm 提示其 postinstall 脚本未获批准，若 `npx esbuild` 报错再处理） |
+
+> `3Dmol-min.js` 580 KB —— 内联进 HTML 完全可接受（最终单文件约 1–2 MB，取决于嵌入的结构数据量）。
 
 | 包 | 类型 | 为什么 |
 |---|---|---|
@@ -130,7 +153,7 @@ npm i -D esbuild
 
 ```powershell
 # 方式 A：跑仓库里的脚本（已写好，需 Node）
-npm run fetch
+npm.cmd run fetch
 
 # 方式 B：浏览器下载
 # https://files.rcsb.org/download/1EMA.pdb
@@ -138,7 +161,17 @@ npm run fetch
 # https://files.rcsb.org/download/1BRS.pdb
 ```
 
-脚本会打印每个文件的字节数与 **SHA-256**，记进 `prep/notes.md`——这是"我处理的是哪个版本的数据"的证据（PDB 条目会被修订）。
+**本机已下载完成**，结果已记入 [`prep/notes.md`](../prep/notes.md)：
+
+| PDB | bytes | ATOM | HETATM |
+|---|---|---|---|
+| 1EMA | 190,188 | 1,717 | 149（CRO 22 + MSE 32 + HOH 95） |
+| 1M17 | 252,720 | 2,511 | 49（AQ4 29 + HOH 20） |
+| 1BRS | 466,965 | 4,640 | 513（全部是 HOH） |
+
+> 📌 体检时发现的两个反直觉点（详见 `prep/notes.md`）：
+> 1. **1EMA 的 `CRO` 和 `MSE` 都是 HETATM** —— 用"删所有 HETATM"的粗暴规则会把发色团和硒代甲硫氨酸一起删掉。
+> 2. **1BRS 实际有 6 条链**（A/B/C 是 barnase，D/E/F 是 barstar），必须只留 A + D。
 
 ---
 

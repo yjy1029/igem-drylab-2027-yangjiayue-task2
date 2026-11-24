@@ -38,9 +38,18 @@ if ($node) {
     Line 'MISS' 'Node.js' '未安装 → winget install OpenJS.NodeJS.LTS'
 }
 
-$npm = Get-Command npm -ErrorAction SilentlyContinue
-if ($npm) { Line 'OK' 'npm' ((& npm -v) 2>$null) }
-else { Line 'MISS' 'npm' '随 Node.js 一起安装，重开终端再试' }
+$npm = Get-Command npm.cmd -ErrorAction SilentlyContinue
+if ($npm) { Line 'OK' 'npm' ((& npm.cmd -v) 2>$null) }
+elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+    Line 'WARN' 'npm' 'PowerShell 里 npm 会命中 npm.ps1 被执行策略拦截，请写 npm.cmd'
+} else { Line 'MISS' 'npm' '随 Node.js 一起安装，重开终端再试' }
+
+$ep = Get-ExecutionPolicy -Scope CurrentUser
+if ($ep -in @('Restricted', 'AllSigned')) {
+    Line 'WARN' '执行策略' "CurrentUser=$ep → .ps1 不能直跑，用 .cmd 包装器 / npm.cmd"
+} else {
+    Line 'OK' '执行策略' "CurrentUser=$ep"
+}
 
 # ---------- 2. 版本管理 / 编辑器 ----------
 $git = Get-Command git -ErrorAction SilentlyContinue

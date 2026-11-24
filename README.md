@@ -7,18 +7,20 @@
 
 ## 现在这个仓库的状态
 
-**阶段：P0 环境准备（进行中）**
+**阶段：P0 环境准备（已完成）**
 
 - [x] 目录结构搭好
-- [ ] Node.js / VS Code 安装完成（见 [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md)）
-- [ ] 三个 PDB 文件下载到 `prep/raw/`
-- [ ] 数据预处理（裁链 / 去水 / 抽配体 / 算接触残基）
+- [x] Node.js `v26.13.1` / npm `11.20.0` 安装完成（见 [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md)）
+- [x] 依赖安装：`3dmol@3.0.0`、`pako@3.0.3`、`esbuild@0.28.2`
+- [x] 三个 PDB 文件下载到 `prep/raw/`（版本与 sha256 记入 [`prep/notes.md`](prep/notes.md)）
+- [ ] 数据预处理（裁链 / 去水 / 抽配体 / 算接触残基）　← **下一步**
 - [ ] `index.html` 功能跑通
 - [ ] 单文件内联 + 断网自测
 - [ ] 视觉打磨
 - [ ] 截图 + 文档 + 提交
 
-> 环境准备的完整核对表在 **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)**，先照它装软件。
+> 环境自检：双击根目录 `check-env.cmd`，或 `npm.cmd run check`。
+> 环境准备的完整核对表在 **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)**。
 
 ---
 
@@ -64,9 +66,9 @@ igem-drylab-2027-<pinyin-name>-task2/
 
 | PDB | 保留 | 删除 | 高亮目标 |
 |---|---|---|---|
-| `1EMA` | Chain A | 水分子 | 发色团 `CRO`（共价残基，位于链内） |
-| `1M17` | Chain A | 水分子、无关杂原子 | 配体 `AQ4` |
-| `1BRS` | Chain A + Chain D | 水分子、其余链 | A↔D 双向接触残基 |
+| `1EMA` | Chain A（含 `MSE` 硒代甲硫氨酸、`CRO` 发色团，二者均为 HETATM） | 水分子 | 发色团 `CRO`（共价残基，位于链内 A/66） |
+| `1M17` | Chain A + 配体 `AQ4` | 水分子 | 配体 `AQ4`（A/999） |
+| `1BRS` | Chain A + Chain D（共 6 条链，其余 B/C/E/F 删） | 水分子、其余 4 条链 | A↔D 双向接触残基 |
 
 **统一接触判据**：残基任一重原子（不含氢）与高亮目标任一重原子距离 **≤ 5 Å**。
 

@@ -66,8 +66,22 @@ if ($git) {
 }
 
 $code = Get-Command code -ErrorAction SilentlyContinue
-if ($code) { Line 'OK' 'VS Code (code)' $code.Source }
-else { Line 'WARN' 'VS Code (code)' '未在 PATH 中 → winget install Microsoft.VisualStudioCode' }
+if ($code) {
+    Line 'OK' '编辑器: VS Code' $code.Source
+} else {
+    # 退而求其次：Visual Studio（2022/2026）也能用「打开文件夹」模式干活
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    $vsPath = $null
+    if (Test-Path $vswhere) {
+        $vsPath = (& $vswhere -latest -products * -property installationPath) 2>$null
+    }
+    if ($vsPath) {
+        Line 'OK' '编辑器: Visual Studio' $vsPath
+        Line 'WARN' '建议装 VS Code' 'VS 较重、大文件略卡，但完全可用（详见 docs/ENVIRONMENT.md）'
+    } else {
+        Line 'WARN' '编辑器' '未找到 VS Code / Visual Studio → winget install Microsoft.VisualStudioCode'
+    }
+}
 
 # ---------- 3. 浏览器 ----------
 $edge = Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge\Application\msedge.exe'

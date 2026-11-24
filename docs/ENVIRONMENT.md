@@ -59,23 +59,39 @@ npm.cmd -v   # ✅ 本机：11.20.0
 > ```
 > 不改执行策略也完全能干活，本文档与脚本内都统一用 `npm.cmd` / `-ExecutionPolicy Bypass`。
 
-### 1.2 VS Code
+### 1.2 编辑器
+
+**本机已装 Visual Studio Community 2026（18.5.2）——可以直接用，不必再装别的东西。**
+
+| 方案 | 说明 | 建议 |
+|---|---|---|
+| **A. 用已有的 Visual Studio 2026** | 免费、已装、能编辑 HTML/CSS/JS、内置终端与 Git | ✅ **零成本，先这么干** |
+| B. 装 VS Code（约 100 MB） | 更轻、打开纯文件夹更顺手、扩展生态（Prettier 等）更好 | 可选，觉得 VS 卡了再装 |
+
+**在 Visual Studio 里怎么打开这个项目（重要）**
+
+- 菜单 `文件` → `打开` → **`文件夹…`**，选 `C:\Users\32240\Desktop\igem-drylab-2027-task2`
+- ⚠️ **不要**新建"项目/解决方案"。纯静态网页不需要 `.sln` / `.csproj`，生成了只会污染仓库，也和"单文件交付"无关。
+- 终端：菜单 `视图` → `终端`（在里面跑 `node` / `git` 命令）
+- 格式化：选中文件按 `Ctrl+K, Ctrl+D`（HTML/CSS/JS 都支持；缩进保持 **2 空格**，和仓库现有代码一致）
+
+**VS 里干活要注意的 3 点**
+
+1. **不要用 VS 打开 `spike/01-hello-3dmol.html` 或未来的 `index.html`**（190 KB ~ 2 MB 的构建产物，会明显卡）。
+   改代码永远改 `src/` 下的源文件，`index.html` 由构建脚本生成。
+2. **不要开"保存时自动格式化"**（会和 Prettier 冲突，也可能改动 PDB 数据行）。
+3. 版本控制**用命令行**（`git add/commit/push`），不要用 VS 的团队资源管理器——两者混用容易出现意料外的暂存。
+
+**如果你后来决定装 VS Code**（可选）：
 
 ```powershell
 winget install Microsoft.VisualStudioCode
+code --install-extension esbenp.prettier-vscode
+code --install-extension EditorConfig.EditorConfig
+code --install-extension usernamehw.errorlens
 ```
 
-扩展（装完在扩展面板里搜，或命令行 `code --install-extension <id>`）：
-
-| 扩展 | 作用 |
-|---|---|
-| `esbenp.prettier-vscode` | 代码格式化（保持风格统一） |
-| `EditorConfig.EditorConfig` | 对齐缩进/换行 |
-| `dbaeumer.vscode-eslint` | 可选；查语法与坏味道 |
-| `ritwickdey.LiveServer` | 可选；一键本地预览 |
-| `usernamehw.errorlens` | 可选；行内报错，写长 JS 很救命 |
-
-> ⚠️ **别装"分子可视化"类扩展**，这个任务不需要，反而会干扰。
+> 仓库根目录已放好 **`jsconfig.json`**，所以无论 VS 还是 VS Code，`src/` 里的 JS 都能拿到正常的类型提示与跳转（它只影响编辑器，不进入交付物）。
 
 ### 1.3 Git（已有，但要配一次身份）
 

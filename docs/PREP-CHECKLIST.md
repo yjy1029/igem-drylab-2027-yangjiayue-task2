@@ -33,34 +33,34 @@
 
 **目标**：有一个能舒服打开 580 KB JS 文件的编辑器。
 
-**操作**
+**方案 A（推荐，零成本）：直接用已经装好的 Visual Studio Community 2026**
+
+- `文件` → `打开` → **`文件夹…`** → 选项目目录
+- ⚠️ **不要**新建"项目/解决方案"（不需要 `.sln`/`.csproj`，只会污染仓库）
+- 终端：`视图` → `终端`
+- 格式化：`Ctrl+K, Ctrl+D`（缩进保持 **2 空格**）
+- **不要**直接打开 `spike/*.html` 或未来的 `index.html`（大文件会卡），只编辑 `src/`
+
+**方案 B（可选）：装 VS Code**
 
 ```powershell
 winget install Microsoft.VisualStudioCode
-```
-
-装完**重开终端**，然后装 3 个扩展（复制粘贴即可）：
-
-```powershell
 code --install-extension esbenp.prettier-vscode
 code --install-extension EditorConfig.EditorConfig
 code --install-extension usernamehw.errorlens
-```
-
-再用 VS Code 打开项目：
-
-```powershell
 code "C:\Users\32240\Desktop\igem-drylab-2027-task2"
 ```
 
-在 VS Code 里按 `Ctrl+Shift+P` → 输入 `Format Document With` → 选 Prettier → 设为默认。
+在 VS Code 里按 `Ctrl+Shift+P` → `Format Document With` → 选 Prettier → 设为默认。
 
 **验收**
-- [ ] `code .` 能在项目目录打开
-- [ ] 左下角显示 `main` 分支（说明 Git 识别到了）
+- [ ] 能用编辑器打开项目目录，并看到 `main` 分支
 - [ ] 打开 `prep/raw/1EMA.pdb` 不卡死
+- [ ] 知道终端在哪、怎么跑 `node` / `git`
 
-**坑**：如果 `code` 命令找不到，重开终端；还不行就用开始菜单打开 VS Code → `Ctrl+Shift+P` → `Shell Command: Install 'code' command in PATH`。
+**坑**
+- VS 里若提示"没有 intellisense"，确认根目录 `jsconfig.json` 存在（已备好）。
+- 别装"分子可视化"类插件，这个任务不需要。
 
 ---
 

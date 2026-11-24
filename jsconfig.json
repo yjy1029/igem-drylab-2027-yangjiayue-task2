@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "checkJs": false,
+    "allowJs": true,
+    "noEmit": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "3dmol": ["node_modules/3dmol/build/3Dmol.js"],
+      "pako": ["node_modules/pako"]
+    }
+  },
+  "include": ["src/**/*.js", "prep/scripts/**/*.mjs", "spike/**/*.mjs", "build/**/*.mjs"],
+  "exclude": ["node_modules", "spike/*.html"]
+}

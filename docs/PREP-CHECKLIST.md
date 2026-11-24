@@ -48,7 +48,7 @@ winget install Microsoft.VisualStudioCode
 code --install-extension esbenp.prettier-vscode
 code --install-extension EditorConfig.EditorConfig
 code --install-extension usernamehw.errorlens
-code "C:\Users\32240\Desktop\igem-drylab-2027-task2"
+code "C:\Users\32240\Desktop\igem-drylab-2027-yangjiayue-task2"
 ```
 
 在 VS Code 里按 `Ctrl+Shift+P` → `Format Document With` → 选 Prettier → 设为默认。
@@ -84,7 +84,7 @@ code "C:\Users\32240\Desktop\igem-drylab-2027-task2"
 
 ```powershell
 cd C:\Users\32240\Desktop
-Rename-Item "igem-drylab-2027-task2" "igem-drylab-2027-yangjiayue-task2"
+Rename-Item "igem-drylab-2027-yangjiayue-task2" "igem-drylab-2027-yangjiayue-task2"
 cd igem-drylab-2027-yangjiayue-task2
 
 git remote add origin https://github.com/<你的用户名>/igem-drylab-2027-yangjiayue-task2.git

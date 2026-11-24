@@ -70,7 +70,7 @@ npm.cmd -v   # ✅ 本机：11.20.0
 
 **在 Visual Studio 里怎么打开这个项目（重要）**
 
-- 菜单 `文件` → `打开` → **`文件夹…`**，选 `C:\Users\32240\Desktop\igem-drylab-2027-task2`
+- 菜单 `文件` → `打开` → **`文件夹…`**，选 `C:\Users\32240\Desktop\igem-drylab-2027-yangjiayue-task2`
 - ⚠️ **不要**新建"项目/解决方案"。纯静态网页不需要 `.sln` / `.csproj`，生成了只会污染仓库，也和"单文件交付"无关。
 - 终端：菜单 `视图` → `终端`（在里面跑 `node` / `git` 命令）
 - 格式化：选中文件按 `Ctrl+K, Ctrl+D`（HTML/CSS/JS 都支持；缩进保持 **2 空格**，和仓库现有代码一致）
@@ -129,7 +129,7 @@ git config --global core.autocrlf true   # Windows 上必配，否则换行符�
 进入项目目录后执行：
 
 ```powershell
-cd C:\Users\32240\Desktop\igem-drylab-2027-task2
+cd C:\Users\32240\Desktop\igem-drylab-2027-yangjiayue-task2
 npm.cmd i 3dmol pako
 npm.cmd i -D esbuild
 ```

@@ -1,65 +1,59 @@
 ﻿import fs from 'node:fs';
 import path from 'node:path';
 
-// ---------- 1. 读文件 ----------
 const here = import.meta.dirname;
-const file = path.join(here, '..', 'raw', '1EMA.pdb');
 
-const text = fs.readFileSync(file, 'latin1');
-const lines = text.split('\n');
+// 配置表：三个结构只有这三处不同
+const structures = [
+    { id: '1EMA', chains: ['A'], het: ['CRO', 'MSE'] },
+    { id: '1M17', chains: ['A'], het: ['AQ4'] },
+    { id: '1BRS', chains: ['A', 'D'], het: [] },
+];
 
-// ---------- 2. 过滤 ----------
-const kept = [];
-let nAtom = 0;
-let nCro = 0;
-let nMse = 0;
-let nDrop = 0;
+for (const s of structures) {
+    // ---------- 读 ----------
+    const inFile = path.join(here, '..', 'raw', s.id + '.pdb');
+    const text = fs.readFileSync(inFile, 'latin1');
+    const lines = text.split('\n');
 
-for (const line of lines) {
-    const rec = line.substring(0, 6).trim();
+    // ---------- 筛（注意：这几个变量在循环内部，每个结构从零开始）----------
+    const kept = [];
+    let nAtom = 0;
+    let nHet = 0;
+    let nDrop = 0;
 
-    // 不是原子行（REMARK / CONECT / TER / END ...）→ 跳过
-    if (rec !== 'ATOM' && rec !== 'HETATM') {
-        continue;
-    }
+    for (const line of lines) {
+        if (line.length < 22) continue;
 
-    // 只要链 A
-    const chain = line.substring(21, 22);
-    if (chain !== 'A') {
-        nDrop++;
-        continue;
-    }
+        const rec = line.substring(0, 6).trim();
+        if (rec !== 'ATOM' && rec !== 'HETATM') continue;
 
-    if (rec === 'ATOM') {
-        // 标准氨基酸原子：全要
-        kept.push(line);
-        nAtom++;
-    } else {
-        // HETATM：只有 CRO / MSE 要
-        const resName = line.substring(17, 20).trim();
-        if (resName === 'CRO') {
+        const chain = line.substring(21, 22);
+        if (!s.chains.includes(chain)) {
+            nDrop++;
+            continue;
+        }
+
+        if (rec === 'ATOM') {
             kept.push(line);
-            nCro++;
-        } else if (resName === 'MSE') {
-            kept.push(line);
-            nMse++;
+            nAtom++;
         } else {
-            nDrop++;          // 主要是 HOH（水）
+            const resName = line.substring(17, 20).trim();
+            if (s.het.includes(resName)) {
+                kept.push(line);
+                nHet++;
+            } else {
+                nDrop++;
+            }
         }
     }
+
+    // ---------- 写 ----------
+    const outDir = path.join(here, '..', 'clean');
+    const outFile = path.join(outDir, s.id + '.pdb');
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(outFile, kept.join('\n') + '\n', 'latin1');
+
+    // ---------- 报告 ----------
+    console.log(s.id, ' ATOM=', nAtom, ' HETATM=', nHet, ' 合计=', kept.length, ' 丢弃=', nDrop);
 }
-
-// ---------- 3. 报告 ----------
-console.log('保留 ATOM =', nAtom);
-console.log('保留 CRO  =', nCro);
-console.log('保留 MSE  =', nMse);
-console.log('丢弃      =', nDrop);
-console.log('合计保留  =', kept.length);
-const outDir = path.join(here, '..', 'clean');
-const outFile = path.join(outDir, '1EMA.pdb');
-
-fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(outFile, kept.join('\n') + '\n', 'latin1');
-
-console.log('已写出:', outFile);
-console.log('写出行数:', kept.length);
